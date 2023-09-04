@@ -1,0 +1,13 @@
+#Name	Period	WCET	BCET	Jitter	Processor	Priority	
+taskA	100000	250	70	20	Proc1		1
+taskB	10000	500	40	20	Proc1		2
+taskC	50000	2600	1800	20	Proc1		3
+taskD	250	160	45	20	Proc1		4
+ISR	550	20	5	0	Proc1		5
+taskE	10000	750	200	20	Proc1		6
+taskG	10000	200	1	20	Proc2		7
+taskH	50000	3800	2600	20	Proc2		8
+taskI	10000	110	2	20	Proc2		9
+taskJ	10000	2500	2	20	Proc2		10
+taskK	10000	500	3	20	Proc2		11
+taskL	2000000	300	150	20	Proc2		12

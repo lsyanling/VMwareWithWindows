@@ -1,0 +1,30 @@
+Files
+=====
+
+ZIMPL files:
+
+* rta.zpl: implements the response-time analysis (reads tasks.txt and processors.txt)
+* map.zpl: implements (optional) task-to-processor mapping (reads tasks.txt)
+* chains.zpl: reads chains.txt
+* dataage.zpl: implements data-age analysis
+
+Input files: 
+
+* processors.txt: list of processing resources
+* tasks.txt: list of tasks and their properties
+* chains.txt: cause-effect chains
+
+Usage
+=====
+
+First, we need to create the LP-file from the ZPL-files by using the `zimpl` binary:
+
+	zimpl chains.zpl rta.zpl dataage.zpl map.zpl -o problem
+
+Note that `map.zpl` is optional and can be omitted if task-to-processor mapping is not fixed.
+
+Second, the generated problem.lp file can be used as an input for any MILP solver, e.g. scip:
+
+	scip
+	SCIP> read problem.lp
+	SCIP> opt
