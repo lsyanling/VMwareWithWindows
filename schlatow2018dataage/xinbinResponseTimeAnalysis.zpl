@@ -2,7 +2,7 @@
 set Chains := { read "chains.txt" as "<1n>" comment "#" };
 set Chains_Tasks := { read "chains.txt" as "<1n,2n>" comment "#" };
 param ChainsLength[<Chain_i> in Chains] := max <Chain_i, Chain_i_Task_j> in Chains_Tasks: Chain_i_Task_j;
-param Chains_TasksName[CHAINID] := read "chains.txt" as "<1n,2n> 3s" comment "#";
+param Chains_TasksName[Chains_Tasks] := read "chains.txt" as "<1n,2n> 3s" comment "#";
 
 do forall <Chain_i> in Chains 
     do forall <Chain_i_Task_j> in { 1 to ChainsLength[Chain_i] - 1 } 
@@ -56,7 +56,7 @@ subto Constraint_5_6:
 	forall <Task_i> in Tasks:
         forall <Task_j> in Tasks - { Task_i }:
             forall <Priority_p> in Prioritys - { n }:
-                Q[Task_i, Task_j] <= ((sum <Task_k> in Tasks with Task_k >= Priority_p + 1) + 1 - B[Task_i, Priority_p]);
+                Q[Task_i, Task_j] <= ((sum <Priority_k> in Prioritys with Priority_k >= Priority_p + 1 : B[Task_j, Priority_k]) + 1 - B[Task_i, Priority_p]);
 
 # 覆盖第i个任务优先级最低的情况
 subto Constraint_5_7:
@@ -73,14 +73,14 @@ subto Constraint_5_8:
 param Periods[Tasks] := read "tasks.txt" as "<1s> 2n" comment "#";
 param WCET[Tasks] := read "tasks.txt" as "<1s> 3n" comment "#";
 param BCET[Tasks] := read "tasks.txt" as "<1s> 4n" comment "#";
-var ResponseTime[Tasks];
+var ResponseTime[Tasks] >= 0;
 
 # 隐式截止期约束
 subto Constraint_5_9:
 	forall <Task_i> in Tasks:
         ResponseTime[Task_i] <= Periods[Task_i];
 
-var H[Tasks_X_Tasks];
+var H[Tasks_X_Tasks] integer >= 0;
 
 # 根据时间预算分析 TDA 计算响应时间
 subto Constraint_5_10:
