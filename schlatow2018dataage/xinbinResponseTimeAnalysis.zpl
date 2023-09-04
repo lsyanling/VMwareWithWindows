@@ -1,4 +1,13 @@
 
+set Chains := { read "chains.txt" as "<1n>" comment "#" };
+set Chains_Tasks := { read "chains.txt" as "<1n,2n>" comment "#" };
+param ChainsLength[<Chain_i> in Chains] := max <Chain_i, Chain_i_Task_j> in Chains_Tasks: Chain_i_Task_j;
+param Chains_TasksName[CHAINID] := read "chains.txt" as "<1n,2n> 3s" comment "#";
+
+do forall <Chain_i> in Chains 
+    do forall <Chain_i_Task_j> in { 1 to ChainsLength[Chain_i] - 1 } 
+	    do print Chains_TasksName[Chain_i, Chain_i_Task_j], "-", Chains_TasksName[Chain_i, Chain_i_Task_j + 1];
+
 set Tasks := { read "tasks.txt" as "<1s>" comment "#" };
 set Processors := { read "processors.txt" as "<1s>" comment "#" };
 param n := card(Tasks);
@@ -8,10 +17,10 @@ set Tasks_X_Processors = Tasks cross Processors;
 set Tasks_X_Prioritys = Tasks cross Prioritys;
 set Tasks_X_Tasks = Tasks cross Tasks;
 
-# A[i,j]表示第i个任务分配给第j个处理器
+# A[i, j]表示第i个任务分配给第j个处理器
 var A[Tasks_X_Processors] binary;
 
-# B[i,j]表示第i个任务分配第j个优先级
+# B[i, j]表示第i个任务分配第j个优先级
 var B[Tasks_X_Prioritys] binary;
 
 # 一个任务只能分配给一个处理器
@@ -29,7 +38,7 @@ subto Constraint_5_4:
 	forall <Priority_j> in Tasks:
         sum <Task_i> in C: B[Task_i, Priority_j] == 1;
 
-# V[i,j]表示第i个任务和第j个任务分配在同一个处理器
+# V[i, j]表示第i个任务和第j个任务分配在同一个处理器
 var V[Tasks_X_Tasks] binary;
 
 # 
@@ -39,7 +48,7 @@ subto Constraint_5_5:
             forall <Task_k> in Tasks - {Task_i, Task_j}:
                 V[Task_i, Task_j] >= 1 - (2 - A[Task_i, Task_k] - A[Task_j, Task_k]);
 
-# Q[i,j]表示第i个任务的优先级高于第j个任务
+# Q[i, j]表示第i个任务的优先级高于第j个任务
 var Q[Tasks_X_Tasks] binary;
 
 # 
@@ -90,4 +99,4 @@ subto Constraint_5_11_2:
 
 do print "Load: ", sum <Task_i> in Tasks: WCET[Task_i] / Periods[Task_i];
 do print "Cores: ", card(Processors);
-do print "Tasks: ", card(Tasks);
+do print "Tasks: ", n;
