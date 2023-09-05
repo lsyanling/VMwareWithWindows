@@ -14,26 +14,73 @@ subto Constraint_5_13:
         forall <Task_j> in Tasks - { Task_i }:
             U[Task_i, Task_j] + U[Task_j, Task_i] <= V[Task_i, Task_j];
 
-set Chains_X_Tasks_X_Tasks = Chains cross Tasks_X_Tasks;
-var deta[Chains_X_Tasks_X_Tasks] >= 0;
-var MaxDataAge[Chains];
+# set Chains_Tasks_X_Chains_Tasks := Chains_Tasks cross Chains_Tasks;
+# var deta[Chains_Tasks_X_Chains_Tasks] integer >=0;
+# var MaxDataAge[Chains];
 
-# Max Data Age
-subto Constraint_5_16:
-    forall <Chain_i> in Chains:
-        MaxDataAge[Chain_i] = (sum <Chain_i, Chain_i_Task_i, Chain_i_Task_j> in deta with Chain_i_Task_i + 1 == Chain_i_Task_j : deta[Chain_i, Chain_i_Task_i, Chain_i_Task_j]) + ResponseTime[Chains_TasksName[Chain_i, card(Chains[Chain_i])]];
+# # deta
+# subto Constraint_5_17:
+#     forall <Chain_i> in Chains:
+#         forall <Chain_i, Chain_i_Task_i> in Chains_Tasks:
+#             forall <Chain_i, Chain_i_Task_j> in Chains_Tasks - { <Chain_i, Chain_i_Task_i> }:
+#                 deta[Chain_i, Chain_i_Task_i, Chain_i, Chain_i_Task_j] == Periods[Chains_TasksName[Chain_i, Chain_i_Task_i]] 
+#                     + U[Chains_TasksName[Chain_i, Chain_i_Task_i], Chains_TasksName[Chain_i, Chain_i_Task_j]] 
+#                     * ResponseTime[Chains_TasksName[Chain_i, Chain_i_Task_i]];
+
+# # Max Data Age
+# subto Constraint_5_16:
+#     forall <Chain_i> in Chains:
+#         MaxDataAge[Chain_i] == (sum <Chain_i, Chain_i_Task_i> in Chains_Tasks with Chain_i_Task_i < ChainsLength[Chain_i]: 
+#                                 deta[Chain_i, Chain_i_Task_i, Chain_i, Chain_i_Task_i + 1])
+#                                 + ResponseTime[Chains_TasksName[Chain_i, ChainsLength[Chain_i]]];
+
+# minimize DataAge:
+#     # sum <Chain_i> in Chains : MaxDataAge[Chain_i];
+# 	# two-objectives: first data age, second response 
+# 	#                 times (to make the RTA tight)
+# 	sum <Task_i> in Tasks: 
+# 		Periods[Task_i] * sum <Chain_i> in Chains: MaxDataAge[Chain_i] + sum <Task_j> in Tasks: ResponseTime[Task_j];
+
+
+# var deta[<Chain_i, Chain_i_Task_i> in Chains_Tasks] integer >=0;
+# var MaxDataAge[Chains] integer >=0;
+
+# # deta
+# subto Constraint_5_17:
+#     forall <Chain_i> in Chains:
+#         forall <Chain_i_Task_i> in {1 to ChainsLength[Chain_i] - 1}:
+#             deta[Chain_i, Chain_i_Task_i] == Periods[Chains_TasksName[Chain_i, Chain_i_Task_i]] 
+#                     + U[Chains_TasksName[Chain_i, Chain_i_Task_i], Chains_TasksName[Chain_i, Chain_i_Task_i + 1]] 
+#                     * ResponseTime[Chains_TasksName[Chain_i, Chain_i_Task_i]];
+
+# # Max Data Age
+# subto Constraint_5_16:
+#     forall <Chain_i> in Chains:
+#         MaxDataAge[Chain_i] == (sum <Chain_i_Task_i> in {1 to ChainsLength[Chain_i] - 1}: deta[Chain_i, Chain_i_Task_i]) 
+#         + ResponseTime[Chains_TasksName[Chain_i, ChainsLength[Chain_i]]];
+
+var deta[<Chain_i, Chain_i_Task_i> in Chains_Tasks] integer >=0;
+var MaxDataAge[Chains] integer >=0;
 
 # deta
 subto Constraint_5_17:
     forall <Chain_i> in Chains:
-        forall <Chain_i, Chain_i_Task_i> in Chains_Tasks:
-            forall <Chain_i, Chain_i_Task_j> in Chains_Tasks - { <Chain_i, Chain_i_Task_i> }:
-                deta[Chain_i, Chain_i_Task_i, Chain_i_Task_j] <= Periods[Chains_TasksName[Chain_i, Chain_i_Task_i]] + U[Chains_TasksName[Chain_i, Chain_i_Task_i], Chains_TasksName[Chain_i, Chain_i_Task_j]] * ResponseTime[Chains_TasksName[Chain_i, Chain_i_Task_i]];
+        forall <Chain_i_Task_i> in {1 to ChainsLength[Chain_i] - 1}:
+            deta[Chain_i, Chain_i_Task_i] == Periods[Chains_TasksName[Chain_i, Chain_i_Task_i]] 
+                * U[Chains_TasksName[Chain_i, Chain_i_Task_i], Chains_TasksName[Chain_i, Chain_i_Task_i + 1]] 
+                + (1 - U[Chains_TasksName[Chain_i, Chain_i_Task_i], Chains_TasksName[Chain_i, Chain_i_Task_i + 1]])
+                * (Periods[Chains_TasksName[Chain_i, Chain_i_Task_i]] + ResponseTime[Chains_TasksName[Chain_i, Chain_i_Task_i]]);
 
-forall <Chain_i> in Chains:
-    minimize DataAge:
-        MaxDataAge[Chain_i];
+# Max Data Age
+subto Constraint_5_16:
+    forall <Chain_i> in Chains:
+        MaxDataAge[Chain_i] == sum <Chain_i_Task_i> in {1 to ChainsLength[Chain_i]}: (deta[Chain_i, Chain_i_Task_i]
+        + ResponseTime[Chains_TasksName[Chain_i, Chain_i_Task_i]]);
+
+
+minimize DataAge:
+    sum <Chain_i> in Chains : MaxDataAge[Chain_i];
 	# two-objectives: first data age, second response 
 	#                 times (to make the RTA tight)
-	# sum <t> in T: 
-	# 	period[t] * sum <c> in S: AGE[c] + sum <t> in T: RT[t];
+	# sum <Task_i> in Tasks: 
+	# 	Periods[Task_i] * sum <Chain_i> in Chains: MaxDataAge[Chain_i] + sum <Task_j> in Tasks: ResponseTime[Task_j];
