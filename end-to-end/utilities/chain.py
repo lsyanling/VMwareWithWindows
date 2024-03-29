@@ -42,6 +42,28 @@ class CauseEffectChain:
         self.deltaBoundTime = 0
         self.inter_detaBoundTime = 0
 
+        self.multi_Kloda = 0
+        self.multi_KlodaTime = 0
+
+        self.multi_DBAge = 0
+        self.multi_DBAgeTime = 0
+
+        self.multi_DeltaBound = 0
+        self.multi_DeltaBoundTime = 0
+
+        self.multi_GunzelAge = 0
+        self.multi_GunzelAgeTime = 0
+
+        self.multi_GunzelReaction = 0
+        self.multi_GunzelReactionTime = 0
+
+        self.multi_DuerrAge = 0
+        self.multi_DuerrAgeTime = 0
+
+        self.multi_DuerrReaction = 0
+        self.multi_DuerrReactionTime = 0
+
+        self.processor = 0 # 处理器编号
 
     def length(self):
         """Compute the length of a cause-effect chain."""

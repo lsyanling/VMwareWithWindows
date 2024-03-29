@@ -320,6 +320,9 @@ class Analyzer:
         time analysis beforehand. ( reaction_our() )
         """
         for chain in chain_set:
+
+            startTime = time.time()
+
             inter_our_react = 0  # total reaction time
             for i in range(0, len(chain.interconnected)):
                 # Case: i is a communication task.
@@ -332,6 +335,10 @@ class Analyzer:
             # Store result.
             chain.inter_our_react = inter_our_react
 
+            finishTime = time.time()
+            chain.multi_GunzelReactionTime += finishTime-startTime
+
+
     def max_age_inter_our(self, chain_set, reduced=False):
         """Our reduced maximum data age analysis for interconnected
         cause-effect chains.
@@ -342,6 +349,9 @@ class Analyzer:
         analysis beforehand. ( max_age_our() and max_age_our(reduced=True) )
         """
         for chain in chain_set:
+
+            startTime = time.time()
+
             m = len(chain.interconnected)  # chain length
             inter_our_red_age = 0  # total data age
             for i in range(0, m-1):
@@ -361,6 +371,9 @@ class Analyzer:
 
             # Store result.
             chain.inter_our_red_age = inter_our_red_age
+
+            finishTime = time.time()
+            chain.multi_GunzelAgeTime += finishTime-startTime
 
     ###
     # Davare analysis from 'Period Optimization for Hard Real-time Distributed
@@ -598,64 +611,74 @@ class Analyzer:
                 finishTime = time.time()
                 chain.deltaBoundTime = finishTime-startTime
 
-    def deltaBound_inter(self, chain_sets):
-            """本文的deltaBound方法 多处理器
+    def deltaBound_inter(self, chain_set):
+        """本文的deltaBound方法 多处理器
 
-            Input: chain is one cause-effect chain. 
-            """
-            for chain_set in chain_sets:
-                for chain in chain_set:
+        Input: chain is one cause-effect chain. 
+        """
+        for chain in chain_set:
+            m = len(chain.interconnected)   # 链的数量，暂时也是处理器数量
+            processorMark = []
+            for i in range(m-1):
+                if(isinstance(chain.interconnected[i], Chain)):
+                    processorMark.append(len(chain.interconnected[i].chain))
+                else:
+                    processorMark.append(1)
 
-                    startTime = time.time()
+            if len(processorMark) > 0:
+                processorMark[0] -= 1
+            for i in range(1, len(processorMark)):
+                processorMark[i] += processorMark[i-1]
 
-                    n = chain.length()
-                    MRT = chain.chain[0].period + chain.chain[-1].rt    # line 1
+            startTime = time.time()
 
-                    for i in range(n-1):    #line 2
-                        producer = chain.chain[i]
-                        consumer = chain.chain[i+1]
-                        gcd = math.gcd(producer.period, consumer.period)    # line 3
-                        delta = 0   # line 4
+            n = chain.length()
+            MRT = chain.chain[0].period + chain.chain[-1].rt    # line 1
 
-                        fai = 0
-                        if producer.phase >= consumer.phase:
-                            fai = producer.phase - consumer.phase
-                            fai %= gcd
+            for i in range(n-1):    #line 2
+                producer = chain.chain[i]
+                consumer = chain.chain[i+1]
+                gcd = math.gcd(producer.period, consumer.period)    # line 3
+                delta = 0   # line 4
+
+                fai = 0
+                if producer.phase >= consumer.phase:
+                    fai = producer.phase - consumer.phase
+                    fai %= gcd
+                else:
+                    fai = producer.phase - consumer.phase + math.ceil(-fai / producer.period) * producer.period
+                    fai %= gcd
+
+                # Gunzel的代码是priority越小优先级越高，我们的论文里越大越高
+                # 如果Pi > Pi+1，并且在同一个处理器上，当i在switchProcessorMark中时，认为是不同处理器
+                if producer.priority < consumer.priority and i not in processorMark:   # line 5
+                    if fai == 0:
+                        delta = consumer.period - gcd
+                    else:
+                        delta = consumer.period - fai
+
+                else:   # line 7
+                    wcrt_i = producer.rt
+                    delta = wcrt_i + consumer.period
+
+                    if fai == 0:
+                        if  wcrt_i % gcd == 0:
+                            delta -= gcd
                         else:
-                            fai = producer.phase - consumer.phase + math.ceil(-fai / producer.period) * producer.period
-                            fai %= gcd
-
-                    # Gunzel的代码是priority越小优先级越高，我们的论文里越大越高
-                    # 如果Pi > Pi+1，并且在同一个处理器上，由于原文考虑的是单处理器，这里认为是同处理器，多处理器另外写代码
-                    # and producer.message == False and chain.chain[i+1].message == False:
-                    if producer.priority < consumer.priority:   # line 5
-                        if fai == 0:
-                            delta = consumer.period - gcd
+                            delta -= (wcrt_i % gcd)
+                    else:
+                        if wcrt_i % gcd == 0:
+                            delta -= fai
                         else:
-                            delta = consumer.period - fai
-
-                    else:   # line 7
-                        wcrt_i = producer.rt
-                        delta = wcrt_i + consumer.period
-
-                        if fai == 0:
-                            if  wcrt_i % gcd == 0:
+                            modConditionEq2 = (fai + wcrt_i % gcd) % gcd
+                            if modConditionEq2 != 0:
+                                delta -= modConditionEq2
+                            else:
                                 delta -= gcd
-                            else:
-                                delta -= (wcrt_i % gcd)
-                        else:
-                            if wcrt_i % gcd == 0:
-                                delta -= fai
-                            else:
-                                modConditionEq2 = (fai + wcrt_i % gcd) % gcd
-                                if modConditionEq2 != 0:
-                                    delta -= modConditionEq2
-                                else:
-                                    delta -= gcd
 
-                    MRT = MRT + delta   # line 10
+                MRT = MRT + delta   # line 10
 
-                chain.deltaBound = MRT  # line 12
+            chain.deltaBound = MRT  # line 12
 
-                finishTime = time.time()
-                chain.deltaBoundTime = finishTime-startTime
+            finishTime = time.time()
+            chain.deltaBoundTime = finishTime-startTime

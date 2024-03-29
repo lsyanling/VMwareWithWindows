@@ -20,8 +20,6 @@ class Task:
 
         self.rt = 0  # Worst-case response time, specified during analysis
 
-        self.processor = 0  # 处理器编号
-
     def __str__(self):
         """Print a task."""
         return (" Type: {type:^}\n ID: {id:^}\n Priority: {priority:^}\n"
