@@ -454,7 +454,7 @@ class Analyzer:
 
 
                 finishTime = time.time()
-                chain.duerrTime = finishTime-startTime
+                chain.duerrAgeTime = finishTime-startTime
 
     ###
     # Kloda analysis from 'Latency analysis for data chains of real-time
