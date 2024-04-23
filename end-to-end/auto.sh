@@ -24,8 +24,8 @@ else
   echo "with $var concurrent jobs"
 fi
 
-num_tries=1  # number of runs
-runs_per_screen=1  # number of runs per screen
+num_tries=2  # number of runs
+runs_per_screen=2  # number of runs per screen
 
 ###
 # Single ECU analysis
@@ -35,7 +35,8 @@ date
 
 # g=0 r=10 with different utilization
 echo "automotive benchmark"
-for util in {50..90..10}
+# for util in {50..90..10}
+for util in {50..75..25}
 do
 	echo "utilization: $util"
 	date
@@ -57,7 +58,8 @@ done
 
   # g=1 r=10 with different utilization
 echo "uunifast benchmark"
-for util in {50..90..10}
+# for util in {50..90..10}
+for util in {50..75..25}
 do
 	echo "utilization: $util"
 	date
@@ -137,15 +139,15 @@ done
 # 	screen -dmS j3g1 python3 main.py -j3 -g1
 ###
 
-echo "===Draw plots."
-date
+# echo "===Draw plots."
+# date
 
-screen -dmS ascrj3g0 python3 main.py -j3 -g0
-screen -dmS ascrj3g1 python3 main.py -j3 -g1
-while screen -list | grep -q ascr.*
-do
-  sleep 1
-done
+# screen -dmS ascrj3g0 python3 main.py -j3 -g0
+# screen -dmS ascrj3g1 python3 main.py -j3 -g1
+# while screen -list | grep -q ascr.*
+# do
+#   sleep 1
+# done
 
-echo "DONE"
-date
+# echo "DONE"
+# date

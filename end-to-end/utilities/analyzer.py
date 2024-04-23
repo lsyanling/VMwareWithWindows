@@ -678,7 +678,7 @@ class Analyzer:
 
                 MRT = MRT + delta   # line 10
 
-            chain.deltaBound = MRT  # line 12
+            chain.multi_DeltaBound = MRT  # line 12
 
             finishTime = time.time()
-            chain.deltaBoundTime = finishTime-startTime
+            chain.multi_DeltaBoundTime = finishTime-startTime

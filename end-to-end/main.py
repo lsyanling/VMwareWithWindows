@@ -23,6 +23,8 @@ import utilities.evaluation as eva
 import time
 import os
 from utilities.task import Task
+from utilities.mytools import get_object_field_keys
+from utilities.mytools import get_object_field_values
 
 
 debug_flag = True  # flag to have breakpoint() when errors occur
@@ -467,27 +469,33 @@ def main():
         ###
         print("=Print time.=")
         with open("./output/time.txt", "w+", encoding="utf-8") as f:
-            f.write("chainlength\t" +
-                    "davareTime\t" 
-                    "duerrReactionTime\t"   +
-                    "duerrAgeTime\t"    +
-                    "klodaTime\t"   +
-                    "gunzelReactionTime\t"  +
-                    "gunzelAgeTime\t"   +
-                    "deltaBoundTime\t"  +
-                    "DBAgeTime\n"
-                )
+            f.write('chainlength,' + get_object_field_keys(chains_single_ECU[0]) + '\n')
             for chain in chains_single_ECU:
-                f.write(f"{chain.length()}\t"   + 
-                        f"{chain.davareTime}\t" + 
-                        f"{chain.duerrReactionTime}\t"  +
-                        f"{chain.duerrAgeTime}\t"   +
-                        f"{chain.klodaTime}\t"  +
-                        f"{chain.gunzelReactionTime}\t" +
-                        f"{chain.gunzelAgeTime}\t"  +
-                        f"{chain.deltaBoundTime}\t" +
-                        f"{chain.DBAgeTime}\n"
-                )
+                f.write(str(chain.length()) + ',' + get_object_field_values(chain) + '\n')
+
+            # f.write("chainlength\t" +
+            #         "davareTime\t"  +
+            #         "duerrReact\t" +
+            #         "duerrReactionTime\t"   +
+            #         "duerrAgeTime\t"    +
+            #         "klodaTime\t"   +
+            #         "gunzelReactionTime\t"  +
+            #         "gunzelAgeTime\t"   +
+            #         "deltaBoundTime\t"  +
+            #         "DBAgeTime\n"
+            #     )
+            # for chain in chains_single_ECU:
+            #     f.write(f"{chain.length()}\t"   + 
+            #             f"{chain.davareTime}\t" +
+            #             f"{chain.duerr_react}\t"+
+            #             f"{chain.duerrReactionTime}\t"  +
+            #             f"{chain.duerrTime}\t"   +   # 因为analyzer代码原因，保存在chain.duerrTime中
+            #             f"{chain.klodaTime}\t"  +
+            #             f"{chain.gunzelReactionTime}\t" +
+            #             f"{chain.gunzelAgeTime}\t"  +
+            #             f"{chain.deltaBoundTime}\t" +
+            #             f"{chain.DBAgeTime}\n"
+            #     )
 
         print("=Draw plots.=")
 
@@ -938,27 +946,9 @@ def main():
         ###
         print("=Print time.=")
         with open("./output/time_offset.txt", "w+", encoding="utf-8") as f:
-            f.write("chainlength\t" +
-                    "davareTime\t" 
-                    "duerrReactionTime\t"   +
-                    "duerrAgeTime\t"    +
-                    "klodaTime\t"   +
-                    "gunzelReactionTime\t"  +
-                    "gunzelAgeTime\t"   +
-                    "deltaBoundTime\t"  +
-                    "DBAgeTime\n"
-                )
+            f.write('chainlength,' + get_object_field_keys(chains_single_ECU[0]) + '\n')
             for chain in chains_single_ECU:
-                f.write(f"{chain.length()}\t"   + 
-                        f"{chain.davareTime}\t" + 
-                        f"{chain.duerrReactionTime}\t"  +
-                        f"{chain.duerrAgeTime}\t"   +
-                        f"{chain.klodaTime}\t"  +
-                        f"{chain.gunzelReactionTime}\t" +
-                        f"{chain.gunzelAgeTime}\t"  +
-                        f"{chain.deltaBoundTime}\t" +
-                        f"{chain.DBAgeTime}\n"
-                )
+                f.write(str(chain.length()) + ',' + get_object_field_values(chain) + '\n')
 
         print("=Draw plots.=")
 
@@ -1018,7 +1008,7 @@ def main():
         utilization = args.u
         gen_setting = args.g
         num_runs = args.n
-        number_interconn_ce_chains = 10000
+        number_interconn_ce_chains = 30000
 
         try:
             ###
@@ -1103,9 +1093,9 @@ def main():
         print("Test: Davare.")
         analyzer.davare([chains_inter])
 
-        print("Test: Duerr.")
-        analyzer.reaction_duerr([chains_inter])
-        analyzer.age_duerr([chains_inter])
+        # print("Test: Duerr.")
+        # analyzer.reaction_duerr([chains_inter])
+        # analyzer.age_duerr([chains_inter])
 
         print("Test: Our.")
         # Our test can only be used when the single processor tests are already
@@ -1141,33 +1131,37 @@ def main():
 
         print("=Print time.=")
         with open("./output/time_multi.txt", "w+", encoding="utf-8") as f:
-            f.write("chainlength\t" +
-                    "davareTime\t" 
-                    "duerrReactionTime\t"   +
-                    "duerrAgeTime\t"    +
-                    "klodaTime\t"   +
-                    "gunzelReactionTime\t"  +
-                    "gunzelAgeTime\t"   +
-                    "deltaBoundTime\t"  +
-                    "DBAgeTime\t"  +
-                    "multi_gunzelReactionTime\t"  +
-                    "deltaBound\t"  +
-                    "inter_gunzelReaction\n"
-                )
+            f.write('chainlength,' + get_object_field_keys(chains_inter[0]) + '\n')
             for chain in chains_inter:
-                f.write(f"{chain.length()}\t"   + 
-                        f"{chain.davareTime}\t" + 
-                        f"{chain.duerrReactionTime}\t"  +
-                        f"{chain.duerrAgeTime}\t"   +
-                        f"{chain.klodaTime}\t"  +
-                        f"{chain.gunzelReactionTime}\t" +
-                        f"{chain.gunzelAgeTime}\t"  +
-                        f"{chain.deltaBoundTime}\t" +
-                        f"{chain.DBAgeTime}\t"  +
-                        f"{chain.multi_GunzelReactionTime}\t" +
-                        f"{chain.deltaBound}\t" +
-                        f"{chain.inter_our_react}\n"
-                )
+                f.write(str(chain.length()) + ',' + get_object_field_values(chain) + '\n')
+
+            # f.write("chainlength\t" +
+            #         "davareTime\t" 
+            #         "duerrReactionTime\t"   +
+            #         "duerrAgeTime\t"    +
+            #         "klodaTime\t"   +
+            #         "gunzelReactionTime\t"  +
+            #         "gunzelAgeTime\t"   +
+            #         "deltaBoundTime\t"  +
+            #         "DBAgeTime\t"  +
+            #         "multi_gunzelReactionTime\t"  +
+            #         "deltaBound\t"  +
+            #         "inter_gunzelReaction\n"
+            #     )
+            # for chain in chains_inter:
+            #     f.write(f"{chain.length()}\t"   + 
+            #             f"{chain.davareTime}\t" + 
+            #             f"{chain.duerrReactionTime}\t"  +
+            #             f"{chain.duerrAgeTime}\t"   +
+            #             f"{chain.klodaTime}\t"  +
+            #             f"{chain.gunzelReactionTime}\t" +
+            #             f"{chain.gunzelAgeTime}\t"  +
+            #             f"{chain.deltaBoundTime}\t" +
+            #             f"{chain.DBAgeTime}\t"  +
+            #             f"{chain.multi_GunzelReactionTime}\t" +
+            #             f"{chain.deltaBound}\t" +
+            #             f"{chain.inter_our_react}\n"
+            #     )
 
 if __name__ == '__main__':
     main()

@@ -368,10 +368,10 @@ def gen_ce_chains(transformed_task_sets):
             continue
 
         # Generate 30 to 60 cause-effect chains for each input task set
-        # 由于np.savez()的错误，现改为每个任务集固定生成50个链
+        # 由于np.savez()的错误，现改为每个任务集固定生成30个链
         # for id_of_generated_ce_chain in range(int(np.random.randint(30, 60))):
         id_of_generated_ce_chain = 0
-        while id_of_generated_ce_chain < 50:
+        while id_of_generated_ce_chain < 30:
             tasks_in_chain = []
 
             # Activation patterns of the cause-effect chain.
