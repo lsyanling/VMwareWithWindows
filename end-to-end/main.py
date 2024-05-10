@@ -292,10 +292,21 @@ def main():
         print("ce_chains shape:", [np.array(c).shape for c in ce_chains])
 
         try:
-            np.savez("output/1single/task_set_u="+str(args.u)
-                     + "_n=" + str(args.n)
-                     + "_g=" + str(args.g) + ".npz", task_sets=task_sets,
-                     chains=ce_chains)
+            # np.savez("output/1single/task_set_u="+str(args.u)
+            #          + "_n=" + str(args.n)
+            #          + "_g=" + str(args.g) + ".npz", task_sets=task_sets,
+            #          chains=ce_chains)
+
+            data_to_save = {}
+            for i, task_set in enumerate(task_sets):
+                data_to_save[f'task_set_{i}'] = task_set
+            for i, ce_chain in enumerate(ce_chains):
+                data_to_save[f'ce_chain_{i}'] = ce_chain
+            
+            np.savez("output/1single/task_set_u=" + str(args.u) +
+                        "_n=" + str(args.n) + 
+                        "_g=" + str(args.g) + ".npz", **data_to_save)
+
         except Exception as e:
             print(e)
             print("ERROR: save")
@@ -334,14 +345,37 @@ def main():
             chains_single_ECU = []
             for i in range(num_runs):
                 name_of_the_run = str(i)
-                data = np.load(
-                        "output/1single/task_set_u=" + str(utilization)
-                        + "_n=" + name_of_the_run
-                        + "_g=" + str(gen_setting)
-                        + ".npz", allow_pickle=True)
-                for chain_set in data.f.chains:
+                # data = np.load(
+                #         "output/1single/task_set_u=" + str(utilization)
+                #         + "_n=" + name_of_the_run
+                #         + "_g=" + str(gen_setting)
+                #         + ".npz", allow_pickle=True)
+
+                # 加载之前保存的.npz文件
+                data = np.load("output/1single/task_set_u=" + str(args.u) +
+                            "_n=" + name_of_the_run + 
+                            "_g=" + str(args.g) + ".npz")
+
+                # 初始化列表来恢复 task_sets 和 ce_chains
+                restored_task_sets = []
+                restored_ce_chains = []
+
+                # 遍历文件中的每个键
+                for key in data.keys():
+                    if key.startswith('task_set_'):
+                        # 将恢复的数组添加到 task_sets 列表
+                        restored_task_sets.append(data[key])
+                    elif key.startswith('ce_chain_'):
+                        # 将恢复的数组添加到 ce_chains 列表
+                        restored_ce_chains.append(data[key])
+
+                for chain_set in restored_ce_chains:
                     for chain in chain_set:
                         chains_single_ECU.append(chain)
+
+                # for chain_set in data.f.chains:
+                #     for chain in chain_set:
+                #         chains_single_ECU.append(chain)
 
                 # Close data file and run the garbage collector.
                 data.close()
@@ -769,10 +803,21 @@ def main():
         print("ce_chains shape:", [np.array(c).shape for c in ce_chains])
 
         try:
-            np.savez("output/1single/task_set_u="+str(args.u)
-                     + "_n=" + str(args.n)
-                     + "_g=" + str(args.g) + "_offset.npz", task_sets=task_sets,
-                     chains=ce_chains)
+            # np.savez("output/1single/task_set_u="+str(args.u)
+            #          + "_n=" + str(args.n)
+            #          + "_g=" + str(args.g) + "_offset.npz", task_sets=task_sets,
+            #          chains=ce_chains)
+
+            data_to_save = {}
+            for i, task_set in enumerate(task_sets):
+                data_to_save[f'task_set_{i}'] = task_set
+            for i, ce_chain in enumerate(ce_chains):
+                data_to_save[f'ce_chain_{i}'] = ce_chain
+            
+            np.savez("output/1single/task_set_u=" + str(args.u) +
+                        "_n=" + str(args.n) + 
+                        "_g=" + str(args.g) + "_offset.npz", **data_to_save)
+            
         except Exception as e:
             print(e)
             print("ERROR: save")
@@ -811,12 +856,31 @@ def main():
             chains_single_ECU = []
             for i in range(num_runs):
                 name_of_the_run = str(i)
-                data = np.load(
-                        "output/1single/task_set_u=" + str(utilization)
-                        + "_n=" + name_of_the_run
-                        + "_g=" + str(gen_setting)
-                        + "_offset.npz", allow_pickle=True)
-                for chain_set in data.f.chains:
+                # data = np.load(
+                #         "output/1single/task_set_u=" + str(utilization)
+                #         + "_n=" + name_of_the_run
+                #         + "_g=" + str(gen_setting)
+                #         + "_offset.npz", allow_pickle=True)
+
+                # 加载之前保存的.npz文件
+                data = np.load("output/1single/task_set_u=" + str(args.u) +
+                            "_n=" + name_of_the_run + 
+                            "_g=" + str(args.g) + "_offset.npz")
+
+                # 初始化列表来恢复 task_sets 和 ce_chains
+                restored_task_sets = []
+                restored_ce_chains = []
+
+                # 遍历文件中的每个键
+                for key in data.keys():
+                    if key.startswith('task_set_'):
+                        # 将恢复的数组添加到 task_sets 列表
+                        restored_task_sets.append(data[key])
+                    elif key.startswith('ce_chain_'):
+                        # 将恢复的数组添加到 ce_chains 列表
+                        restored_ce_chains.append(data[key])
+
+                for chain_set in restored_ce_chains:
                     for chain in chain_set:
                         chains_single_ECU.append(chain)
 
