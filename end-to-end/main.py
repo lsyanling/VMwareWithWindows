@@ -354,7 +354,7 @@ def main():
                 # 加载之前保存的.npz文件
                 data = np.load("output/1single/task_set_u=" + str(args.u) +
                             "_n=" + name_of_the_run + 
-                            "_g=" + str(args.g) + ".npz")
+                            "_g=" + str(args.g) + ".npz", allow_pickle=True)
 
                 # 初始化列表来恢复 task_sets 和 ce_chains
                 restored_task_sets = []
@@ -1083,21 +1083,51 @@ def main():
             com_tasks = []
             for i in range(num_runs):
                 name_of_the_run = str(i)
-                data = np.load(
-                        "output/1single/task_set_u=" + str(utilization)
-                        + "_n=" + name_of_the_run
-                        + "_g=" + str(gen_setting)
-                        + "_offset.npz", allow_pickle=True)
-                for chain_set in data.f.chains:
+
+                # 加载之前保存的.npz文件
+                data = np.load("output/1single/task_set_u=" + str(args.u) +
+                            "_n=" + name_of_the_run + 
+                            "_g=" + str(args.g) + "_offset.npz")
+
+                # 初始化列表来恢复 task_sets 和 ce_chains
+                restored_task_sets = []
+                restored_ce_chains = []
+
+                # 遍历文件中的每个键
+                for key in data.keys():
+                    if key.startswith('task_set_'):
+                        # 将恢复的数组添加到 task_sets 列表
+                        restored_task_sets.append(data[key])
+                    elif key.startswith('ce_chain_'):
+                        # 将恢复的数组添加到 ce_chains 列表
+                        restored_ce_chains.append(data[key])
+
+                for chain_set in restored_ce_chains:
                     for chain in chain_set:
                         chains_single_ECU.append(chain)
 
-                for task_set in data.f.task_sets:
+                for task_set in restored_task_sets:
                     for task in task_set:
                         copyTask = Task(task.id, task.phase, task.bcet, task.wcet, task.period,
                  task.deadline, task.priority, message=True)
                         copyTask.rt = task.rt
                         com_tasks.append(copyTask)
+
+                # data = np.load(
+                #         "output/1single/task_set_u=" + str(utilization)
+                #         + "_n=" + name_of_the_run
+                #         + "_g=" + str(gen_setting)
+                #         + "_offset.npz", allow_pickle=True)
+                # for chain_set in data.f.chains:
+                #     for chain in chain_set:
+                #         chains_single_ECU.append(chain)
+
+                # for task_set in data.f.task_sets:
+                #     for task in task_set:
+                #         copyTask = Task(task.id, task.phase, task.bcet, task.wcet, task.period,
+                #  task.deadline, task.priority, message=True)
+                #         copyTask.rt = task.rt
+                #         com_tasks.append(copyTask)
 
                 # Close data file and run the garbage collector.
                 data.close()
@@ -1120,7 +1150,7 @@ def main():
             chain_all = []  # sequence of all tasks (from chains + comm tasks)
             i_chain_all = []  # sequence of chains and comm_tasks
 
-            # 通信任务在这里仅代表处理器切换，已经在上面copy了，这里的代码保留但不使用
+            # 由于原来任务集的任务已经在上面copy了，通过切割定理，无需用通信任务表示处理器切换，这里的代码保留但不使用
             # Generate communication tasks.
             # com_tasks = comm.generate_communication_taskset(20, 10, 1000, True)
 
@@ -1131,6 +1161,11 @@ def main():
             multi_GunzelReactionTime = 0
 
             for chain in list(np.random.choice(chains_single_ECU, n, replace=False)):  # randomly choose 处理器数量个链
+
+                # 只取长度小于等于4的链
+                if chain.length() > 4:
+                    continue
+
                 i_chain_all.append(chain)
                 for task in chain.chain:
                     chain_all.append(task)
