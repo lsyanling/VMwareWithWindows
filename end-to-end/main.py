@@ -865,7 +865,7 @@ def main():
                 # 加载之前保存的.npz文件
                 data = np.load("output/1single/task_set_u=" + str(args.u) +
                             "_n=" + name_of_the_run + 
-                            "_g=" + str(args.g) + "_offset.npz")
+                            "_g=" + str(args.g) + "_offset.npz", allow_pickle=True)
 
                 # 初始化列表来恢复 task_sets 和 ce_chains
                 restored_task_sets = []
