@@ -616,6 +616,7 @@ class Analyzer:
 
         Input: chain is one cause-effect chain. 
         """
+        fuck = 0
         for chain in chain_set:
             m = len(chain.interconnected)   # 链的数量，暂时也是处理器数量
             processorMark = []
@@ -633,6 +634,10 @@ class Analyzer:
             startTime = time.time()
 
             n = chain.length()
+            if n == 0:
+                print(fuck)
+                fuck+=1
+                continue
             MRT = chain.chain[0].period + chain.chain[-1].rt    # line 1
 
             for i in range(n-1):    #line 2

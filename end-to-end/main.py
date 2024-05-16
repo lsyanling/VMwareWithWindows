@@ -464,7 +464,7 @@ def main():
         # Variables.
         gen_setting = args.g
         # utilizations = [50.0, 60.0, 70.0, 80.0, 90.0] # TODO
-        utilizations = [50.0]
+        utilizations = [75.0]
 
         try:
             ###
@@ -1087,7 +1087,7 @@ def main():
                 # 加载之前保存的.npz文件
                 data = np.load("output/1single/task_set_u=" + str(args.u) +
                             "_n=" + name_of_the_run + 
-                            "_g=" + str(args.g) + "_offset.npz")
+                            "_g=" + str(args.g) + "_offset.npz", allow_pickle=True)
 
                 # 初始化列表来恢复 task_sets 和 ce_chains
                 restored_task_sets = []
@@ -1182,6 +1182,19 @@ def main():
             if j % 100 == 0:
                 print("\t", j)
 
+        try:
+            np.savez(
+            "./output/2interconn/chains_" + "u=" + str(utilization)
+            + "_g=" + str(gen_setting) + "_offset_source.npz",
+            chains_inter=chains_inter)
+        except Exception as e:
+            print(e)
+            print("ERROR: inputs from single are missing")
+            if debug_flag:
+                breakpoint()
+            else:
+                return
+                
         ###
         # Analyses (Davare, Duerr, Our).
         # Kloda is not included, since it is only for synchronized clocks.
@@ -1199,7 +1212,7 @@ def main():
         print("Test: Our.")
         # Our test can only be used when the single processor tests are already
         # done.
-        analyzer.max_age_inter_our(chains_inter, reduced=True)
+        # analyzer.max_age_inter_our(chains_inter, reduced=True)
         analyzer.reaction_inter_our(chains_inter)
 
         # print("Test: DBAge.")
@@ -1261,6 +1274,137 @@ def main():
             #             f"{chain.deltaBound}\t" +
             #             f"{chain.inter_our_react}\n"
             #     )
+    
+    elif args.j == 8:
+        """多核 analysis.
+
+        Required arguments:
+        -j7
+        -u : utilization (for loading)
+        -g : task generation setting (for loading)
+
+        Load data, create interconnected chains and then do the analysis by
+        Davare, Duerr and Our.
+        """
+        # 处理器核数
+        n = args.c
+
+        # Variables.
+        utilization = args.u
+        gen_setting = args.g
+        num_runs = args.n
+        number_interconn_ce_chains = 30000
+
+        chains_inter = []
+
+        try:
+            ###
+            # Load data.
+            ###
+            print("=Load data.=")
+            chains_single_ECU = []
+
+            # 加载之前保存的.npz文件
+            data = np.load("output/2interconn/chains_u=" + str(args.u) +
+                        "_g=" + str(args.g) + "_offset_source.npz", allow_pickle=True)
+
+            # Interconnected.
+            for chain in data.f.chains_inter:
+                chains_inter.append(chain)
+                
+            # Close data file and run the garbage collector.
+            data.close()
+            del data
+            gc.collect()
+            
+        except Exception as e:
+            print(e)
+            print("ERROR: inputs from single are missing")
+            if debug_flag:
+                breakpoint()
+            else:
+                return
+        
+        ###
+        # Analyses (Davare, Duerr, Our).
+        # Kloda is not included, since it is only for synchronized clocks.
+        ###
+        print("=Analyses (Davare, Duerr, Our).=")
+        analyzer = a.Analyzer("0")
+
+        print("Test: Davare.")
+        analyzer.davare([chains_inter])
+
+        # print("Test: Duerr.")
+        # analyzer.reaction_duerr([chains_inter])
+        # analyzer.age_duerr([chains_inter])
+
+        print("Test: Our.")
+        # Our test can only be used when the single processor tests are already
+        # done.
+        # analyzer.max_age_inter_our(chains_inter, reduced=True)
+        analyzer.reaction_inter_our(chains_inter)
+
+        # print("Test: DBAge.")
+        # analyzer.DBAge([chains_inter])
+
+        print("Test: deltaBound.")
+        analyzer.deltaBound_inter(chains_inter)
+
+        ###
+        # Save data.
+        ###
+        print("=Save data.=")
+
+        try:
+            np.savez(
+                "./output/4multi/chains_" + "u=" + str(utilization)
+                + "_g=" + str(gen_setting) + "_multi.npz",
+                chains_inter=chains_inter, chains_single_ECU=chains_single_ECU)
+
+        except Exception as e:
+            print(e)
+            print("ERROR: save")
+            if debug_flag:
+                breakpoint()
+            else:
+                return
+            
+
+        print("=Print time.=")
+        with open("./output/time_multi.txt", "w+", encoding="utf-8") as f:
+            f.write('chainlength,' + get_object_field_keys(chains_inter[0]) + '\n')
+            for chain in chains_inter:
+                f.write(str(chain.length()) + ',' + get_object_field_values(chain) + '\n')
+
+            # f.write("chainlength\t" +
+            #         "davareTime\t" 
+            #         "duerrReactionTime\t"   +
+            #         "duerrAgeTime\t"    +
+            #         "klodaTime\t"   +
+            #         "gunzelReactionTime\t"  +
+            #         "gunzelAgeTime\t"   +
+            #         "deltaBoundTime\t"  +
+            #         "DBAgeTime\t"  +
+            #         "multi_gunzelReactionTime\t"  +
+            #         "deltaBound\t"  +
+            #         "inter_gunzelReaction\n"
+            #     )
+            # for chain in chains_inter:
+            #     f.write(f"{chain.length()}\t"   + 
+            #             f"{chain.davareTime}\t" + 
+            #             f"{chain.duerrReactionTime}\t"  +
+            #             f"{chain.duerrAgeTime}\t"   +
+            #             f"{chain.klodaTime}\t"  +
+            #             f"{chain.gunzelReactionTime}\t" +
+            #             f"{chain.gunzelAgeTime}\t"  +
+            #             f"{chain.deltaBoundTime}\t" +
+            #             f"{chain.DBAgeTime}\t"  +
+            #             f"{chain.multi_GunzelReactionTime}\t" +
+            #             f"{chain.deltaBound}\t" +
+            #             f"{chain.inter_our_react}\n"
+            #     )
+    
 
 if __name__ == '__main__':
     main()
