@@ -69,6 +69,8 @@ class Evaluation:
 
         # Save.
         plt.savefig(filename)
+        plt.savefig(filename + '.eps', format='eps')
+
 
     def davare_boxplot_reaction(self, chains, filename, xaxis_label="",
                                 ylabel=None):
@@ -117,8 +119,10 @@ class Evaluation:
         ax1.hlines(self.hlines, 0, 5, linestyles=(0, (5, 5)),
                    colors="lightgrey")
         my_plot = ax1.boxplot(
-                [duerr, kloda, our, deltaBound],
-                labels=["Dürr", "Kloda", "Günzel", "delta-Bound"],
+                [duerr, our, deltaBound],
+                # [duerr, kloda, our, deltaBound],
+                labels=["Dürr", "Günzel", "delta-Bound"],
+                # labels=["Dürr", "Kloda", "Günzel", "delta-Bound"],
                 showfliers=False,
                 boxprops=boxprops,
                 medianprops=medianprops,
@@ -137,6 +141,7 @@ class Evaluation:
 
         # Save.
         plt.savefig(filename)
+        plt.savefig(filename + '.eps', format='eps')
 
     def davare_boxplot_age_interconnected(self, chains, filename,
                                           xaxis_label="", ylabel=None):
@@ -195,6 +200,8 @@ class Evaluation:
 
         # Save.
         plt.savefig(filename)
+        plt.savefig(filename + '.eps', format='svg')
+
 
     def davare_boxplot_reaction_interconnected(self, chains, filename,
                                                xaxis_label="", ylabel=None):
@@ -213,7 +220,7 @@ class Evaluation:
         for chain in chains:
             duerr.append((1-(chain.duerr_react/chain.davare))*100)
             our.append((1-(chain.inter_our_react/chain.davare))*100)
-            deltaBound.append((1-(chain.inter_deltaBound/chain.davare))*100)
+            deltaBound.append((1-(chain.inter_detaBound/chain.davare))*100)
 
         # Plotting.
         # Blue box configuration:
@@ -253,6 +260,8 @@ class Evaluation:
 
         # Save.
         plt.savefig(filename)
+        plt.savefig(filename + '.eps', format='svg')
+
 
     def heatmap_improvement_disorder_age(self, chains, filename,
                                          yaxis_label="", xaxis_label=""):

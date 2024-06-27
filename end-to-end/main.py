@@ -464,7 +464,7 @@ def main():
         # Variables.
         gen_setting = args.g
         # utilizations = [50.0, 60.0, 70.0, 80.0, 90.0] # TODO
-        utilizations = [75.0]
+        utilizations = [50.0]
 
         try:
             ###
@@ -971,7 +971,7 @@ def main():
         # Variables.
         gen_setting = args.g
         # utilizations = [50.0, 60.0, 70.0, 80.0, 90.0] # TODO
-        utilizations = [75.0]
+        utilizations = [50.0]
 
         try:
             ###
@@ -1164,6 +1164,10 @@ def main():
 
                 # 只取长度小于等于4的链
                 if chain.length() > 4:
+                    continue
+
+                if chain.length() == 0:
+                    print('000')
                     continue
 
                 i_chain_all.append(chain)
