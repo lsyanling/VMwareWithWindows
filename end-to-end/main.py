@@ -464,7 +464,7 @@ def main():
         # Variables.
         gen_setting = args.g
         # utilizations = [50.0, 60.0, 70.0, 80.0, 90.0] # TODO
-        utilizations = [50.0]
+        utilizations = [75.0]
 
         try:
             ###

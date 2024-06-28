@@ -121,8 +121,8 @@ class Evaluation:
         my_plot = ax1.boxplot(
                 [duerr, our, deltaBound],
                 # [duerr, kloda, our, deltaBound],
-                labels=["Dürr", "Günzel", "delta-Bound"],
-                # labels=["Dürr", "Kloda", "Günzel", "delta-Bound"],
+                labels=["Dürr-B", "Günzel-B", "δ-Bound"],
+                # labels=["Dürr-B", "Kloda-B", "Günzel-B", "δ-Bound"],
                 showfliers=False,
                 boxprops=boxprops,
                 medianprops=medianprops,
@@ -200,7 +200,7 @@ class Evaluation:
 
         # Save.
         plt.savefig(filename)
-        plt.savefig(filename + '.eps', format='svg')
+        plt.savefig(filename + '.eps', format='eps')
 
 
     def davare_boxplot_reaction_interconnected(self, chains, filename,
@@ -244,7 +244,7 @@ class Evaluation:
                    colors="lightgrey")
         my_plot = ax1.boxplot(
                 [duerr, our, deltaBound],
-                labels=["Dürr", "Günzel", "delta-Bound"],
+                labels=["Dürr-B", "Günzel-B", "δ-Bound"],
                 showfliers=False,
                 boxprops=boxprops,
                 medianprops=medianprops,
@@ -260,7 +260,7 @@ class Evaluation:
 
         # Save.
         plt.savefig(filename)
-        plt.savefig(filename + '.eps', format='svg')
+        plt.savefig(filename + '.eps', format='eps')
 
 
     def heatmap_improvement_disorder_age(self, chains, filename,
